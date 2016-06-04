@@ -5,10 +5,12 @@ this project is my first year Student Special Project under supervisor of ***Mas
 ## 1. Implementaion of SOM using Processing 2
   
    Library Requirement:
-    1. Processing (>2.0)
+   
+    1. Processing/Java (>2.0)
 
 ## 2. Implementation of SOM using JavaScript:
   Library Requirement:
+  
     1. D3js 
     
 
