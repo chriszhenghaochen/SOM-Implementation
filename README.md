@@ -1,6 +1,6 @@
 # Self-Organizing-Map-Implementation
 
-this project is my first year Student Special Project under supervisor of Masahiro ***Takasutka*** Email:masa.takatsuka@sydney.edu.au, it includes 2 things:
+this project is my first year Student Special Project under supervisor of ***Masahiro Takasutka*** Email:masa.takatsuka@sydney.edu.au, it includes 2 things:
 
 ## 1. Implementaion of SOM using Processing 2
   
