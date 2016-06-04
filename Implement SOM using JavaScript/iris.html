@@ -1,0 +1,386 @@
+
+
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+		<script type="text/javascript" src="http://d3js.org/d3.v3.js"></script>
+		<script type="text/javascript" src="http://d3js.org/d3.hexbin.v0.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.js"></script>
+		
+			
+	</head>
+	<body>	
+		<div id="chart"></div>
+		<script type="text/javascript">
+
+SOM = (function() {
+    function SOM(inputDimension, iterations) {
+      var i, j, _i, _j, _ref, _ref1;
+      this.inputDimension = inputDimension;
+      this.iterations = iterations;
+      this.height = 30;
+      this.width = 20;
+      this.radius = 20 * 0.8;
+      this.timeConstant = this.iterations / Math.log(this.radius);
+      this.nodes = [];
+      this.learnRate = 0.05;
+      for (i = _i = 0, _ref = this.height * this.width - 1; _i <= _ref; i = _i += 1) {
+        this.nodes[i] = new Node(this.inputDimension);
+      }
+      for (j = _j = 0, _ref1 = this.height * this.width - 1; _j <= _ref1; j = _j += 1) {
+        this.nodes[j].y = j / this.height | 0;
+        this.nodes[j].x = j % this.height;
+      }
+    }
+
+    SOM.prototype.train = function(i, w) {
+      var BMU, a, d, influence, k, learnDecay, radiusDecay, _i, _j, _ref, _ref1;
+      radiusDecay = this.radius * Math.exp((-1) * i / this.timeConstant);
+      learnDecay = this.learnRate * Math.exp((-1) * i / this.timeConstant);
+      BMU = this.best_match(w);
+      for (a = _i = 0, _ref = this.height * this.width - 1; _i <= _ref; a = _i += 1) {
+        d = this.geo_Distance(this.nodes[a], this.nodes[BMU]);
+        if (d < radiusDecay) {
+          influence = Math.exp(((-1) * Math.pow(d, 2)) / (2 * radiusDecay * i));
+          for (k = _j = 0, _ref1 = this.inputDimension - 1; _j <= _ref1; k = _j += 1) {
+            this.nodes[a].weight[k] += influence * learnDecay * (w[k] - this.nodes[a].weight[k]);
+          }
+        }
+      }
+    };
+
+    SOM.prototype.geo_Distance = function(node1, node2) {
+      return Math.sqrt(Math.pow(node1.x - node2.x, 2) + Math.pow(node1.y - node2.y, 2));
+    };
+
+    SOM.prototype.weight_distance = function(x, y) {
+      var i, tmp, _i, _ref;
+      tmp = 0;
+      for (i = _i = 0, _ref = x.length - 1; _i <= _ref; i = _i += 1) {
+        tmp += Math.pow(x[i] - y[i], 2);
+      }
+      tmp = Math.sqrt(tmp);
+      return tmp;
+    };
+
+    SOM.prototype.best_match = function(w) {
+      var i, minDist, minIndex, tmp, _i, _ref;
+      minDist = this.inputDimension;
+      tmp = 0;
+      minIndex = 0;
+      for (i = _i = 0, _ref = this.height * this.width - 1; _i <= _ref; i = _i += 1) {
+        tmp = this.weight_distance(this.nodes[i].weight, w);
+        if (tmp < minDist) {
+          minDist = tmp;
+          minIndex = i;
+        }
+      }
+      return minIndex;
+    };
+
+    return SOM;
+
+  })();
+
+  Node = (function() {
+    function Node(d) {
+      var i, _i, _ref;
+      this.weight = [];
+      this.x = null;
+      this.y = null;
+      for (i = _i = 0, _ref = d - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.weight[i] = Math.random();
+      }
+    }
+
+    return Node;
+
+  })();
+
+  var max = 1000;
+  
+  var som = new SOM(4,max);
+var iris=[];
+ iris[0]=[0,0,0,0];
+   iris[1]=[5.1,3.5,1.4,0.2];
+   iris[2]=[4.9,3.0,1.4,0.2];
+   iris[3]=[4.7,3.2,1.3,0.2];
+   iris[4]=[4.6,3.1,1.5,0.2];
+   iris[5]=[5.0,3.6,1.4,0.2];
+   iris[6]=[5.4,3.9,1.7,0.4];
+   iris[7]=[4.6,3.4,1.4,0.3];
+   iris[8]=[4.4,2.9,1.4,0.2]; 
+   iris[9]=[4.9,3.1,1.5,0.1];
+   iris[10]=[5.4,3.7,1.5,0.2];
+   iris[11]=[4.8,3.4,1.6,0.2];
+   iris[12]=[4.8,3.0,1.4,0.1];
+   iris[13]=[4.3,3.0,1.1,0.1];
+   iris[14]=[5.8,4.0,1.2,0.2];
+   iris[15]=[5.7,4.4,1.5,0.4];
+   iris[16]=[5.4,3.9,1.3,0.4];
+   iris[17]=[5.1,3.5,1.4,0.3];
+   iris[18]=[5.7,3.8,1.7,0.3];
+   iris[19]=[5.4,3.4,1.7,0.2];
+   iris[20]=[5.1,3.7,1.5,0.4];
+   iris[21]=[4.6,3.6,1.0,0.2];
+   iris[22]=[5.1,3.3,1.7,0.5];
+   iris[23]=[4.8,3.4,1.9,0.];
+   iris[24]=[5.0,3.0,1.6,0.2];
+   iris[25]=[5.0,3.4,1.6,0.4];
+   iris[26]=[5.2,3.5,1.5,0.2];
+   iris[27]=[5.2,3.4,1.4,0.2];
+   iris[28]=[4.7,3.2,1.6,0.2];
+   iris[29]=[4.8,3.1,1.6,0.2];
+   iris[30]=[5.4,3.4,1.5,0.4];
+   iris[31]=[5.2,4.1,1.5,0.1];
+   iris[32]=[5.5,4.2,1.4,0.2];
+   iris[33]=[4.9,3.1,1.5,0.1];
+   iris[34]=[5.0,3.2,1.2,0.2];
+   iris[35]=[5.5,3.5,1.3,0.2];
+   iris[36]=[4.9,3.1,1.5,0.1];
+   iris[37]=[4.4,3.0,1.3,0.2];
+   iris[38]=[5.1,3.4,1.5,0.2];
+   iris[39]=[5.0,3.5,1.3,0.3];
+   iris[40]=[4.5,2.3,1.3,0.3];
+   iris[41]=[4.4,3.2,1.3,0.2];
+   iris[42]=[5.0,3.5,1.6,0.6];
+   iris[43]=[5.1,3.8,1.9,0.4];
+   iris[44]=[4.8,3.0,1.4,0.3];
+   iris[45]=[5.1,3.8,1.6,0.2];
+   iris[46]=[4.6,3.2,1.4,0.2];
+   iris[47]=[5.3,3.7,1.5,0.2];
+   iris[48]=[5.0,3.3,1.4,0.2]; // setosa data
+	 iris[49]=[7.0,3.2,4.7,1.4];
+	 iris[50]=[6.4,3.2,4.5,1.5];
+	 iris[51]=[6.9,3.1,4.9,1.5];
+	 iris[52]=[5.5,2.3,4.0,1.3];
+	 iris[53]=[6.5,2.8,4.6,1.5];
+	 iris[54]=[5.7,2.8,4.5,1.3];
+	 iris[55]=[6.3,3.3,4.7,1.6];
+	 iris[56]=[4.9,2.4,3.3,1.0];
+	 iris[57]=[6.6,2.9,4.6,1.3];
+	 iris[58]=[5.2,2.7,3.9,1.4];
+	 iris[59]=[5.0,2.0,3.5,1.0];
+	 iris[60]=[5.9,3.0,4.2,1.5];
+	 iris[61]=[6.0,2.2,4.0,1.0];
+	 iris[62]=[6.1,2.9,4.7,1.4];
+	 iris[63]=[5.6,2.9,3.6,1.3];
+	 iris[64]=[6.7,3.1,4.4,1.4];
+	 iris[65]=[5.6,3.0,4.5,1.5];
+	 iris[66]=[5.8,2.7,4.1,1.0];
+	 iris[67]=[6.2,2.2,4.5,1.5];
+	 iris[68]=[5.6,2.5,3.9,1.1];
+	 iris[69]=[5.9,3.2,4.8,1.8];
+	 iris[70]=[6.1,2.8,4.0,1.3];
+	 iris[71]=[6.3,2.5,4.9,1.5];
+	 iris[72]=[6.1,2.8,4.7,1.2];
+	 iris[73]=[6.4,2.9,4.3,1.3];
+	 iris[74]=[6.6,3.0,4.4,1.4];
+	 iris[75]=[6.8,2.8,4.8,1.4];
+	 iris[76]=[6.7,3.0,5.0,1.7];
+	 iris[77]=[6.0,2.9,4.5,1.5];
+	 iris[78]=[5.7,2.6,3.5,1.0];
+	 iris[79]=[5.5,2.4,3.8,1.1];
+	 iris[80]=[5.5,2.4,3.7,1.0];
+	 iris[81]=[5.8,2.7,3.9,1.2];
+	 iris[82]=[6.0,2.7,5.1,1.6];
+	 iris[83]=[5.4,3.0,4.5,1.5];
+	 iris[84]=[6.0,3.4,4.5,1.6];
+	 iris[85]=[6.7,3.1,4.7,1.5];
+	 iris[86]=[6.3,2.3,4.4,1.3];
+	 iris[87]=[5.6,3.0,4.1,1.3];
+	 iris[88]=[5.5,2.5,4.0,1.3];
+	 iris[89]=[5.5,2.6,4.4,1.2];
+	 iris[90]=[6.1,3.0,4.6,1.4];
+	 iris[91]=[5.8,2.6,4.0,1.2];
+	 iris[92]=[5.0,2.3,3.3,1.0];
+	 iris[93]=[5.6,2.7,4.2,1.3];
+	 iris[94]=[5.7,3.0,4.2,1.2];
+	 iris[95]=[5.7,2.9,4.2,1.3];
+	 iris[96]=[6.2,2.9,4.3,1.3];
+	 iris[97]=[5.1,2.5,3.0,1.1];
+	 iris[98]=[5.7,2.8,4.1,1.3];//versicolor
+	 iris[99]=[6.3,3.3,6.0,2.5];
+	 iris[100]=[5.8,2.7,5.1,1.9];
+	 iris[101]=[7.1,3.0,5.9,2.1];
+	 iris[102]=[6.3,2.9,5.6,1.8];
+	 iris[103]=[6.5,3.0,5.8,2.2];
+	 iris[104]=[7.6,3.0,6.6,2.1];
+	 iris[105]=[4.9,2.5,4.5,1.7];
+	 iris[106]=[7.3,2.9,6.3,1.8];
+	 iris[107]=[6.7,2.5,5.8,1.8];
+	 iris[108]=[7.2,3.6,6.1,2.5];
+	 iris[109]=[6.5,3.2,5.1,2.0];
+	 iris[110]=[6.4,2.7,5.3,1.9];
+	 iris[111]=[6.8,3.0,5.5,2.1];
+	 iris[112]=[5.7,2.5,5.0,2.0];
+	 iris[113]=[5.8,2.8,5.1,2.4];
+	 iris[114]=[6.4,3.2,5.3,2.3];
+	 iris[115]=[6.5,3.0,5.5,1.8];
+	 iris[116]=[7.7,3.8,6.7,2.2];
+	 iris[117]=[7.7,2.6,6.9,2.3];
+	 iris[118]=[6.0,2.2,5.0,1.5];
+	 iris[119]=[6.9,3.2,5.7,2.3];
+	 iris[120]=[5.6,2.8,4.9,2.0];
+	 iris[121]=[7.7,2.8,6.7,2.0];
+	 iris[122]=[6.3,2.7,4.9,1.8];
+	 iris[123]=[6.7,3.3,5.7,2.1];
+	 iris[124]=[7.2,3.2,6.0,1.8];
+	 iris[125]=[6.2,2.8,4.8,1.8];
+	 iris[126]=[6.1,3.0,4.9,1.8];
+	 iris[127]=[6.4,2.8,5.6,2.1];
+	 iris[128]=[7.2,3.0,5.8,1.6];
+	 iris[129]=[7.4,2.8,6.1,1.9];
+	 iris[130]=[7.9,3.8,6.4,2.0];
+	 iris[131]=[6.4,2.8,5.6,2.2];
+	 iris[132]=[6.3,2.8,5.1,1.5];
+	 iris[133]=[6.1,2.6,5.6,1.4];
+	 iris[134]=[7.7,3.0,6.1,2.3];
+	 iris[135]=[6.3,3.4,5.6,2.4];
+	 iris[136]=[6.4,3.1,5.5,1.8];
+	 iris[137]=[6.0,3.0,4.8,1.8];
+	 iris[138]=[6.9,3.1,5.4,2.1];
+	 iris[139]=[6.7,3.1,5.6,2.4];
+	 iris[140]=[6.9,3.1,5.1,2.3];
+	 iris[141]=[5.8,2.7,5.1,1.9];
+	 iris[142]=[6.8,3.2,5.9,2.3];
+	 iris[143]=[6.7,3.3,5.7,2.5];
+	 iris[144]=[6.7,3.0,5.2,2.3];
+	 iris[145]=[6.3,2.5,5.0,1.9];
+	 iris[146]=[6.5,3.0,5.2,2.0];
+	 iris[147]=[6.2,3.4,5.4,2.3];
+	 iris[148]=[5.9,3.0,5.1,1.8];//virginica
+
+  for (var i=1; i < max+1; i++) {
+    for(var j=1;j<149;j++){
+	som.train(i,iris[j]);
+	}
+  }
+
+	
+		
+	
+
+
+	
+var margin = {
+    top: 30,
+    right: 20,
+    bottom: 20,
+    left: 50
+};
+
+var width = 850;
+var height = 350;
+
+var MapColumns =30;
+var MapRows =20;
+
+var hexRadius = d3.min([width/(Math.sqrt(3)*(MapColumns+3)),
+			height/((MapRows+3)*1.5)]);
+			
+
+var points = [];
+for (var i = 0; i < MapRows; i++) {
+    for (var j = 0; j < MapColumns; j++) {
+        points.push([hexRadius * j * 1.75, hexRadius * i * 1.5]);
+    }//for j
+}//for i
+
+
+var svg = d3.select("#chart").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	
+var hexbin = d3.hexbin()
+            .radius(hexRadius);
+
+var neighbourWeightCount=[];			
+var colors = [];			
+for (var i=0; i < MapColumns*MapRows;i++){
+
+  if(som.nodes[i].y % 2 == 1){
+	var neighbourWeight=0;
+	var color = 0;
+	var neighbours = [];
+	neighbours[0] = i-MapColumns -1;
+	neighbours[1] = i-MapColumns;
+	neighbours[2] = i-1;
+	neighbours[3] = i+1;
+	neighbours[4] = i+MapColumns -1;
+	neighbours[5] = i+MapColumns;
+	
+	for(var j=0; j < 6; j++){
+	 if((neighbours[j] >= 0) && (neighbours[j] < MapColumns*MapRows)){
+	    var k = neighbours[j];
+		neighbourWeight += som.weight_distance(som.nodes[i].weight, som.nodes[k].weight);
+		}
+		neighbourWeightCount[i] = neighbourWeight;
+	}
+	}
+	else {
+	var neighbourWeight=0;
+	var color = 0;
+	var neighbours = [];
+	neighbours[0] = i-MapColumns;
+	neighbours[1] = i-MapColumns +1;
+	neighbours[2] = i-1;
+	neighbours[3] = i+1;
+	neighbours[4] = i+MapColumns;
+	neighbours[5] = i+MapColumns +1;
+	
+	for(var j=0; j < 6; j++){
+	 if((neighbours[j] >= 0) &&(neighbours[j] < MapColumns*MapRows)){
+	    var k = neighbours[j];
+		neighbourWeight += som.weight_distance(som.nodes[i].weight, som.nodes[k].weight);
+		}
+		neighbourWeightCount[i] = neighbourWeight;
+	}
+	}
+	}
+var maxNei=0;
+var minNei=1;
+for(var i=0; i < MapColumns*MapRows;i++){
+if(neighbourWeightCount[i]< minNei){
+	minNei=neighbourWeightCount[i];
+	
+}
+if(neighbourWeightCount[i]> maxNei){
+	maxNei=neighbourWeightCount[i];
+	
+}
+}	
+
+for(var i=0; i < MapColumns*MapRows;i++){
+	var hue= Math.round(255-(neighbourWeightCount[i]-minNei)/(maxNei-minNei)*255);
+	colors[i] = d3.hsl(hue,0.6,0.6);
+}
+	
+svg.append("g")
+    .selectAll(".hexagon")
+    .data(hexbin(points))
+    .enter().append("path")
+    .attr("class", "hexagon")
+    .attr("d", function (d) {
+		return "M" + d.x + "," + d.y + hexbin.hexagon();
+	})
+    .attr("stroke", function (d,i) {
+		return "#fff";
+	})
+    .style("fill", function (d,i) {
+       return colors[i];
+ })
+
+
+		   
+ 
+
+
+
+	
+		</script>
+	</body>
+</html>

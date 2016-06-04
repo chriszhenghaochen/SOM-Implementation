@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+		<script type="text/javascript" src="http://d3js.org/d3.v3.js"></script>
+		<script type="text/javascript" src="http://d3js.org/d3.hexbin.v0.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.js"></script>
+		
+			
+	</head>
+	<body>	
+		<div id="chart"></div>
+		<script type="text/javascript">
+
+SOM = (function() {
+    function SOM(inputDimension, iterations) {
+      var i, j, _i, _j, _ref, _ref1;
+      this.inputDimension = inputDimension;
+      this.iterations = iterations;
+      this.height = 30;
+      this.width = 20;
+      this.radius = 20 * 0.8;
+      this.timeConstant = this.iterations / Math.log(this.radius);
+      this.nodes = [];
+      this.learnRate = 0.05;
+      for (i = _i = 0, _ref = this.height * this.width - 1; _i <= _ref; i = _i += 1) {
+        this.nodes[i] = new Node(this.inputDimension);
+      }
+      for (j = _j = 0, _ref1 = this.height * this.width - 1; _j <= _ref1; j = _j += 1) {
+        this.nodes[j].y = j / this.height | 0;
+        this.nodes[j].x = j % this.height;
+      }
+    }
+
+    SOM.prototype.train = function(i, w) {
+      var BMU, a, d, influence, k, learnDecay, radiusDecay, _i, _j, _ref, _ref1;
+      radiusDecay = this.radius * Math.exp((-1) * i / this.timeConstant);
+      learnDecay = this.learnRate * Math.exp((-1) * i / this.timeConstant);
+      BMU = this.best_match(w);
+      for (a = _i = 0, _ref = this.height * this.width - 1; _i <= _ref; a = _i += 1) {
+        d = this.geo_Distance(this.nodes[a], this.nodes[BMU]);
+        if (d < radiusDecay) {
+          influence = Math.exp(((-1) * Math.pow(d, 2)) / (2 * radiusDecay * i));
+          for (k = _j = 0, _ref1 = this.inputDimension - 1; _j <= _ref1; k = _j += 1) {
+            this.nodes[a].weight[k] += influence * learnDecay * (w[k] - this.nodes[a].weight[k]);
+          }
+        }
+      }
+    };
+
+    SOM.prototype.geo_Distance = function(node1, node2) {
+      return Math.sqrt(Math.pow(node1.x - node2.x, 2) + Math.pow(node1.y - node2.y, 2));
+    };
+
+    SOM.prototype.weight_distance = function(x, y) {
+      var i, tmp, _i, _ref;
+      tmp = 0;
+      for (i = _i = 0, _ref = x.length - 1; _i <= _ref; i = _i += 1) {
+        tmp += Math.pow(x[i] - y[i], 2);
+      }
+      tmp = Math.sqrt(tmp);
+      return tmp;
+    };
+
+    SOM.prototype.best_match = function(w) {
+      var i, minDist, minIndex, tmp, _i, _ref;
+      minDist = this.inputDimension;
+      tmp = 0;
+      minIndex = 0;
+      for (i = _i = 0, _ref = this.height * this.width - 1; _i <= _ref; i = _i += 1) {
+        tmp = this.weight_distance(this.nodes[i].weight, w);
+        if (tmp < minDist) {
+          minDist = tmp;
+          minIndex = i;
+        }
+      }
+      return minIndex;
+    };
+
+    return SOM;
+
+  })();
+
+  Node = (function() {
+    function Node(d) {
+      var i, _i, _ref;
+      this.weight = [];
+      this.x = null;
+      this.y = null;
+      for (i = _i = 0, _ref = d - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.weight[i] = Math.random();
+      }
+    }
+
+    return Node;
+
+  })();
+
+  var max = 1000;
+  
+  var som = new SOM(14,max);
+country=[];
+country[0]=[53608446, 1595, 767,1,0, 49100000000,131,4901530,	4624359,	5875019,	46140,	37630,	122332.399, 3715043055];    //JPN
+country[1]=[145212012, 13683, 8325,10,1, 612500000000,473,16800000,	16800000,	16967740,	53670,	53960,	316128.839, 235867000000];//USA
+country[2]=[10500000,59,59,0,0,1870000000,53,1560597,	1007353,	1515558,	65520,	42540,	23130.9, 49396157289];//AUS
+country[3]=[25609290,1393,2346,0,0,33700000000,166,1304554,	1664259,	1301575,	25920,	33440,	50219.669,	12220700000];//KOR
+country[4]=[69117271,3082,15500,1,1,76600000000,352,2096777,	3461259,	1988216,	13860,	23200,	143499.861,	70653718709];//RUS
+country[5]=[749610775,2788,9150,1,1,126000000000,520,9240270,	16157704,	8905336,	6560,	11850,	1357380,	347848740397];//CHN
+country[6]=[28802096,1203,423,1,1,43000000000,120,2734949,	2436930,	2789619,	42250,	37580,	66028.467,	6480400817 ];//FRA
+country[7]=[36417842,710,408,0,0,45000000000,53,3634823,	3493479,	3716838,	46100,	44540,	80621.788,	32627493896];//GER
+country[8]=[29164233,908,407,1,1,53600000000,66,2521381,	2320104,	2508965,	39140,	35760,	64097.085,	48314454024];//ENG
+country[9]=[15786816,404,201,0,0,18000000000,67,1826769,	1520493,	1835383,	52200,	42610,	35158.304,	67581373072];//CAN
+country[10]=[615201057,1785,3569,2,0,46000000000,184,1876797,	6774441,	1960072,	1570,	5350,	1252139.596,	28153031270];//IND
+country[11]=[41637773,989,3657,0,0,18185000000,115,820207,	1421881,	820622,	    10950,	18760,	74932.641,	12868000000];//TUR
+
+var maxValue=[];
+for(var k=0; k<14;k++){
+	maxValue[k]=0;
+	for(var j=0;j<12;j++){
+		if(country[j][k] > maxValue[k]){
+			maxValue[k]=country[j][k] ;
+		}
+	}
+	for( var i=0; i<12;i++){
+	 country[i][k]=country[i][k]/maxValue[k];
+	}
+	}
+	
+ for (var i=1; i < max+1; i++) {
+	for(var j=0;j<12;j++){
+		som.train(i, country[j]);
+	}
+}
+	
+		
+	
+
+
+	
+var margin = {
+    top: 30,
+    right: 20,
+    bottom: 20,
+    left: 50
+};
+
+var width = 850;
+var height = 350;
+
+var MapColumns =30;
+var MapRows =20;
+
+var hexRadius = d3.min([width/(Math.sqrt(3)*(MapColumns+3)),
+			height/((MapRows+3)*1.5)]);
+			
+
+var points = [];
+for (var i = 0; i < MapRows; i++) {
+    for (var j = 0; j < MapColumns; j++) {
+        points.push([hexRadius * j * 1.75, hexRadius * i * 1.5]);
+    }//for j
+}//for i
+
+
+var svg = d3.select("#chart").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	
+var hexbin = d3.hexbin()
+            .radius(hexRadius);
+
+var neighbourWeightCount=[];			
+var colors = [];			
+for (var i=0; i < MapColumns*MapRows;i++){
+
+  if(som.nodes[i].y % 2 == 1){
+	var neighbourWeight=0;
+	var color = 0;
+	var neighbours = [];
+	neighbours[0] = i-MapColumns -1;
+	neighbours[1] = i-MapColumns;
+	neighbours[2] = i-1;
+	neighbours[3] = i+1;
+	neighbours[4] = i+MapColumns -1;
+	neighbours[5] = i+MapColumns;
+	
+	for(var j=0; j < 6; j++){
+	 if((neighbours[j] >= 0) && (neighbours[j] < MapColumns*MapRows)){
+	    var k = neighbours[j];
+		neighbourWeight += som.weight_distance(som.nodes[i].weight, som.nodes[k].weight);
+		}
+		neighbourWeightCount[i] = neighbourWeight;
+	}
+	}
+	else {
+	var neighbourWeight=0;
+	var color = 0;
+	var neighbours = [];
+	neighbours[0] = i-MapColumns;
+	neighbours[1] = i-MapColumns +1;
+	neighbours[2] = i-1;
+	neighbours[3] = i+1;
+	neighbours[4] = i+MapColumns;
+	neighbours[5] = i+MapColumns +1;
+	
+	for(var j=0; j < 6; j++){
+	 if((neighbours[j] >= 0) &&(neighbours[j] < MapColumns*MapRows)){
+	    var k = neighbours[j];
+		neighbourWeight += som.weight_distance(som.nodes[i].weight, som.nodes[k].weight);
+		}
+		neighbourWeightCount[i] = neighbourWeight;
+	}
+	}
+	}
+var maxNei=0;
+var minNei=1;
+for(var i=0; i < MapColumns*MapRows;i++){
+if(neighbourWeightCount[i]< minNei){
+	minNei=neighbourWeightCount[i];
+	
+}
+if(neighbourWeightCount[i]> maxNei){
+	maxNei=neighbourWeightCount[i];
+	
+}
+}	
+
+for(var i=0; i < MapColumns*MapRows;i++){
+	var hue= Math.round(250-(neighbourWeightCount[i]-minNei)/(maxNei-minNei)*255*2);
+	colors[i] = d3.hsl(hue,0.6,0.6);
+}
+
+var text = []
+for(var i=0; i<MapColumns*MapRows; i++){
+	text[i] ="";
+}
+
+for(var i=0; i<MapColumns*MapRows; i++){
+	var index1 = som.best_match(country[0]);
+	text[index1] = "JPN";
+	var index2 = som.best_match(country[1]);
+	text[index2] = "USA";
+	var index3 = som.best_match(country[2]);
+	text[index3] = "AUS";
+	var index4 = som.best_match(country[3]);
+	text[index4] = "KOR";
+	var index5 = som.best_match(country[4]);
+	text[index5] = "RUS";
+	var index6 = som.best_match(country[5]);
+	text[index6] = "CHN";
+	var index7 = som.best_match(country[6]);
+	text[index7] = "FRA";
+	var index8 = som.best_match(country[7]);
+	text[index8] = "GER";
+	var index9 = som.best_match(country[8]);
+	text[index9] ="ENG";
+	var index10 = som.best_match(country[9]);
+	text[index10] = "CAN";
+	var index11 = som.best_match(country[10]);
+	text[index11] = "IND";
+	var index12 = som.best_match(country[11]);
+	text[index12] = "TUR";	
+}
+	
+svg.append("g")
+    .selectAll(".hexagon")
+    .data(hexbin(points))
+    .enter().append("path")
+    .attr("class", "hexagon")
+    .attr("d", function (d) {
+		return "M" + d.x + "," + d.y + hexbin.hexagon();
+	})
+    .attr("stroke", function (d,i) {
+		return "#fff";
+	})
+    .style("fill", function (d,i) {
+       return colors[i];
+ })
+
+
+text= svg.selectAll("text")
+					  .data(hexbin(points))
+					  .enter().append("text")
+					  .attr("x",function(d){
+					     return d.x;
+					  })
+					  .attr("y",function(d){
+						 return d.y;
+					  })
+					  .text(function(d,i){
+					  return text[i];
+					  })
+					  .style("font-family", "sans-serif")
+					  .style("font-size", "15px")
+					  .style("fill", "black");
+		   
+ 
+
+
+
+	
+		</script>
+	</body>
+</html>

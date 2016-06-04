@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+		<script type="text/javascript" src="http://d3js.org/d3.v3.js"></script>
+		<script type="text/javascript" src="http://d3js.org/d3.hexbin.v0.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.js"></script>
+		
+			
+	</head>
+	<body>	
+		<div id="chart"></div>
+		<script type="text/javascript">
+
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+		<script type="text/javascript" src="http://d3js.org/d3.v3.js"></script>
+		<script type="text/javascript" src="http://d3js.org/d3.hexbin.v0.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.js"></script>
+		
+			
+	</head>
+	<body>	
+		<div id="chart"></div>
+		<script type="text/javascript">
+
+SOM = (function() {
+    function SOM(inputDimension, iterations) {
+      var i, j, _i, _j, _ref, _ref1;
+      this.inputDimension = inputDimension;
+      this.iterations = iterations;
+      this.height = 30;
+      this.width = 20;
+      this.radius = 20 * 0.8;
+      this.timeConstant = this.iterations / Math.log(this.radius);
+      this.nodes = [];
+      this.learnRate = 0.05;
+      for (i = _i = 0, _ref = this.height * this.width - 1; _i <= _ref; i = _i += 1) {
+        this.nodes[i] = new Node(this.inputDimension);
+      }
+      for (j = _j = 0, _ref1 = this.height * this.width - 1; _j <= _ref1; j = _j += 1) {
+        this.nodes[j].y = j / this.height | 0;
+        this.nodes[j].x = j % this.height;
+      }
+    }
+
+    SOM.prototype.train = function(i, w) {
+      var BMU, a, d, influence, k, learnDecay, radiusDecay, _i, _j, _ref, _ref1;
+      radiusDecay = this.radius * Math.exp((-1) * i / this.timeConstant);
+      learnDecay = this.learnRate * Math.exp((-1) * i / this.timeConstant);
+      BMU = this.best_match(w);
+      for (a = _i = 0, _ref = this.height * this.width - 1; _i <= _ref; a = _i += 1) {
+        d = this.geo_Distance(this.nodes[a], this.nodes[BMU]);
+        if (d < radiusDecay) {
+          influence = Math.exp(((-1) * Math.pow(d, 2)) / (2 * radiusDecay * i));
+          for (k = _j = 0, _ref1 = this.inputDimension - 1; _j <= _ref1; k = _j += 1) {
+            this.nodes[a].weight[k] += influence * learnDecay * (w[k] - this.nodes[a].weight[k]);
+          }
+        }
+      }
+    };
+
+    SOM.prototype.geo_Distance = function(node1, node2) {
+      return Math.sqrt(Math.pow(node1.x - node2.x, 2) + Math.pow(node1.y - node2.y, 2));
+    };
+
+    SOM.prototype.weight_distance = function(x, y) {
+      var i, tmp, _i, _ref;
+      tmp = 0;
+      for (i = _i = 0, _ref = x.length - 1; _i <= _ref; i = _i += 1) {
+        tmp += Math.pow(x[i] - y[i], 2);
+      }
+      tmp = Math.sqrt(tmp);
+      return tmp;
+    };
+
+    SOM.prototype.best_match = function(w) {
+      var i, minDist, minIndex, tmp, _i, _ref;
+      minDist = this.inputDimension;
+      tmp = 0;
+      minIndex = 0;
+      for (i = _i = 0, _ref = this.height * this.width - 1; _i <= _ref; i = _i += 1) {
+        tmp = this.weight_distance(this.nodes[i].weight, w);
+        if (tmp < minDist) {
+          minDist = tmp;
+          minIndex = i;
+        }
+      }
+      return minIndex;
+    };
+
+    return SOM;
+
+  })();
+
+  Node = (function() {
+    function Node(d) {
+      var i, _i, _ref;
+      this.weight = [];
+      this.x = null;
+      this.y = null;
+      for (i = _i = 0, _ref = d - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.weight[i] = Math.random();
+      }
+    }
+
+    return Node;
+
+  })();
+
+  var max = 1000;
+  
+  var som = new SOM(16,max);
+
+  var dove = [1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0.5, 0];
+  var hen = [1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.5, 0];
+  var duck = [1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0.5, 0];
+  var goose =[1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0.5, 0];
+  var owl = [1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0];
+  var hawk =[1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0];
+  var eagle = [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0];
+  var fox = [0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0.5, 0, 0];
+  var dog = [0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
+  var wolf =[0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0];
+  var cat = [1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0.5, 0, 0];
+  var tiger = [0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0.5, 0, 1];
+  var lion = [0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0.5, 0, 1];
+  var horse = [0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0];
+  var zebra = [0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1];
+  var cow = [0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0];
+
+  for (var i=1; i < max+1; i++) {
+    som.train(i, dove);
+    som.train(i, hen);
+    som.train(i, duck);
+    som.train(i, goose);
+    som.train(i, owl);
+	som.train(i, hawk);
+	som.train(i, eagle);
+	som.train(i, fox);
+	som.train(i, dog);
+	som.train(i, wolf);
+	som.train(i, cat);
+	som.train(i, tiger);
+	som.train(i, lion);
+	som.train(i, horse);
+	som.train(i, zebra);
+	som.train(i, cow);
+  }
+
+	
+		
+	
+
+
+	
+var margin = {
+    top: 30,
+    right: 20,
+    bottom: 20,
+    left: 50
+};
+
+var width = 850;
+var height = 350;
+
+var MapColumns =30;
+var MapRows =20;
+
+var hexRadius = d3.min([width/(Math.sqrt(3)*(MapColumns+3)),
+			height/((MapRows+3)*1.5)]);
+			
+
+var points = [];
+for (var i = 0; i < MapRows; i++) {
+    for (var j = 0; j < MapColumns; j++) {
+        points.push([hexRadius * j * 1.75, hexRadius * i * 1.5]);
+    }//for j
+}//for i
+
+
+var svg = d3.select("#chart").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	
+var hexbin = d3.hexbin()
+            .radius(hexRadius);
+
+var neighbourWeightCount=[];			
+var colors = [];			
+for (var i=0; i < MapColumns*MapRows;i++){
+
+  if(som.nodes[i].y % 2 == 1){
+	var neighbourWeight=0;
+	var color = 0;
+	var neighbours = [];
+	neighbours[0] = i-MapColumns -1;
+	neighbours[1] = i-MapColumns;
+	neighbours[2] = i-1;
+	neighbours[3] = i+1;
+	neighbours[4] = i+MapColumns -1;
+	neighbours[5] = i+MapColumns;
+	
+	for(var j=0; j < 6; j++){
+	 if((neighbours[j] >= 0) && (neighbours[j] < MapColumns*MapRows)){
+	    var k = neighbours[j];
+		neighbourWeight += som.weight_distance(som.nodes[i].weight, som.nodes[k].weight);
+		}
+		neighbourWeightCount[i] = neighbourWeight;
+	}
+	}
+	else {
+	var neighbourWeight=0;
+	var color = 0;
+	var neighbours = [];
+	neighbours[0] = i-MapColumns;
+	neighbours[1] = i-MapColumns +1;
+	neighbours[2] = i-1;
+	neighbours[3] = i+1;
+	neighbours[4] = i+MapColumns;
+	neighbours[5] = i+MapColumns +1;
+	
+	for(var j=0; j < 6; j++){
+	 if((neighbours[j] >= 0) &&(neighbours[j] < MapColumns*MapRows)){
+	    var k = neighbours[j];
+		neighbourWeight += som.weight_distance(som.nodes[i].weight, som.nodes[k].weight);
+		}
+		neighbourWeightCount[i] = neighbourWeight;
+	}
+	}
+	}
+var maxNei=0;
+var minNei=1;
+for(var i=0; i < MapColumns*MapRows;i++){
+if(neighbourWeightCount[i]< minNei){
+	minNei=neighbourWeightCount[i];
+	
+}
+if(neighbourWeightCount[i]> maxNei){
+	maxNei=neighbourWeightCount[i];
+	
+}
+}	
+
+for(var i=0; i < MapColumns*MapRows;i++){
+	var hue= Math.round(255-(neighbourWeightCount[i]-minNei)/(maxNei-minNei)*360);
+	colors[i] = d3.hsl(hue,0.6,0.6);
+}
+
+var text = []
+for(var i=0; i<MapColumns*MapRows; i++){
+	text[i] ="";
+}
+
+for(var i=0; i<MapColumns*MapRows; i++){
+	var index1 = som.best_match(dove);
+	text[index1] = "dove";
+	var index2 = som.best_match(hen);
+	text[index2] = "hen";
+	var index3 = som.best_match(duck);
+	text[index3] = "duck";
+	var index4 = som.best_match(goose);
+	text[index4] = "goose";
+	var index5 = som.best_match(owl);
+	text[index5] = "owl";
+	var index6 = som.best_match(hawk);
+	text[index6] = "hawk";
+	var index7 = som.best_match(eagle);
+	text[index7] = "eagle";
+	var index8 = som.best_match(fox);
+	text[index8] = "fox";
+	var index9 = som.best_match(cow);
+	text[index9] ="cow";
+	var index10 = som.best_match(lion);
+	text[index10] = "lion";
+	var index11 = som.best_match(dog);
+	text[index11] = "dog";
+	var index12 = som.best_match(wolf);
+	text[index12] = "wolf";
+	var index13 = som.best_match(cat);
+	text[index13] = "cat";
+	var index14 = som.best_match(tiger);
+	text[index14] = "tiger";
+	var index15 = som.best_match(zebra);
+	text[index15] = "zebra";
+	var index16 = som.best_match(horse);
+	text[index16] = "horse";
+	
+	
+	
+}
+	
+svg.append("g")
+    .selectAll(".hexagon")
+    .data(hexbin(points))
+    .enter().append("path")
+    .attr("class", "hexagon")
+    .attr("d", function (d) {
+		return "M" + d.x + "," + d.y + hexbin.hexagon();
+	})
+    .attr("stroke", function (d,i) {
+		return "#fff";
+	})
+    .style("fill", function (d,i) {
+       return colors[i];
+ })
+
+
+text= svg.selectAll("text")
+					  .data(hexbin(points))
+					  .enter().append("text")
+					  .attr("x",function(d){
+					     return d.x;
+					  })
+					  .attr("y",function(d){
+						 return d.y;
+					  })
+					  .text(function(d,i){
+					  return text[i];
+					  })
+					  .style("font-family", "sans-serif")
+					  .style("font-size", "15px")
+					  .style("fill", "white");
+		   
+ 
+
+
+
+	
+		</script>
+	</body>
+</html>
