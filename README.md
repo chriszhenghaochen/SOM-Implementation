@@ -10,3 +10,6 @@ this project is my first year Student Special Project under supervisor of ***Mas
 ## 2. Implementation of SOM using JavaScript:
   Library Requirement:
     1. D3js 
+    
+
+The document (report) are inside the folder of implementation
