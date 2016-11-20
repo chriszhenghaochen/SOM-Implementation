@@ -1,6 +1,10 @@
 # Self-Organizing-Map-Implementation
 
-this project is my first year Student Special Project under supervisor of ***Masahiro Takasutka*** Email:masa.takatsuka@sydney.edu.au, it includes 2 things:
+this project is my first year Student Special Project under supervisor of 
+
+***Masahiro Takasutka*** Email:masa.takatsuka@sydney.edu.au
+
+
 
 ## 1. Implementaion of SOM using Processing 2
   
@@ -14,9 +18,11 @@ this project is my first year Student Special Project under supervisor of ***Mas
     1. D3js 
     
 
-***The document (report) are inside the folder of implementation***
+## The document 
 
-### Acknowledgement:
+Report are inside the folder of implementation***
+
+## Acknowledgement:
 
 The SOM Processing is modified from 
 http://jjguy.com/som/
