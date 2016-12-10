@@ -20,7 +20,7 @@ this project is my first year Student Special Project under supervisor of
 
 ## The document 
 
-Report are inside the folder of implementation***
+Report are inside the folder of implementation
 
 ## Acknowledgement:
 
